@@ -1,7 +1,7 @@
-// 24K-0631
+// 24K-0631 Maryum Faisal - Task 2
 #include<iostream>
 #include<string>
-#include<stack>
+#include<ctime>
 using namespace std;
 class Transaction{
 public:
@@ -10,7 +10,7 @@ public:
     string description;
     int flag;
     Transaction* next;
-    Transaction(int tid,double amt,string desc,int f){
+    Transaction(int tid, double amt, string desc, int f) {
         id=tid;
         amount=amt;
         description=desc;
@@ -27,21 +27,21 @@ public:
         top=nullptr;
         idCounter=1;
     }
-    string shortenDesc(string desc){
-        if(desc.length()>20)
+    string shortenDesc(string desc) {
+        if (desc.length()>20)
             return desc.substr(0, 17) + "...";
         return desc;
     }
-    double applyDiscount(double amt){
-        if(amt>=1500)
+    double applyDiscount(double amt) {
+        if (amt>=1500)
             amt*=0.70;
-        else if(amt>=1000)
+        else if (amt>=1000)
             amt*=0.85;
         else if(amt>=500)
             amt*=0.95;
         return amt;
     }
-    void push(double amt,string desc){
+    void push(double amt, string desc) {
         int flag=(amt>=0)?1:0;
         desc=shortenDesc(desc);
         if(flag==1)
@@ -50,21 +50,21 @@ public:
         newNode->next=top;
         top=newNode;
     }
-    Transaction* pop(){
-        if (top==nullptr){
-            cout<<"Stack Underflow — No transaction to pop.\n";
+    Transaction* pop() {
+        if (top==nullptr) {
+            cout <<"Stack Underflow — No transaction to pop.\n";
             return nullptr;
         }
         Transaction* temp=top;
         top=top->next;
-        temp->amount *=-1;
-        temp->description +=" [REVERSED]";
+        temp->amount*=-1;
+        temp->description += " [REVERSED]";
         temp->flag=2;
         temp->next=nullptr;
         return temp;
     }
     void display(){
-        if(top==nullptr){
+        if (top==nullptr) {
             cout<<"No transactions in stack.\n";
             return;
         }
@@ -73,57 +73,80 @@ public:
         cout << "\nFinal Stack Output:\n";
         Transaction* temp = top;
         cout << "Top → ";
-        while (temp != nullptr) {
-            cout <<"[id=" <<temp->id
-                 <<", amt=" <<temp->amount
-                 <<", desc=\"" <<temp->description
-                 <<"\", flag=" <<temp->flag << "]\n";
-            temp=temp->next;
+        while (temp!=nullptr) {
+            cout <<"[id="<< temp->id
+                 << ", amt="<< temp->amount
+                 << ",desc=\""<< temp->description
+                 << "\", flag=" << temp->flag << "]\n";
+            temp = temp->next;
         }
-        cout<<"Bottom\n";
+        cout << "Bottom\n";
     }
 };
 int precedence(char op) {
-    if(op=='+'||op=='-') return 1;
-    if (op=='*'||op== '/') return 2;
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
     return 0;
 }
 double applyOp(double a, double b, char op) {
-    if (op=='+') return a+b;
-    if (op=='-') return a-b;
-    if (op=='*') return a*b;
-    if (op=='/') return a/b;
+    if (op == '+') return a + b;
+    if (op == '-') return a - b;
+    if (op == '*') return a * b;
+    if (op == '/') return a / b;
     return 0;
 }
+
 bool isDigitOrDot(char c) {
     return (c >= '0' && c <= '9') || c == '.';
 }
 
-string infixToPostfix(string infix){
-    stack<char> st;
-    string postfix="";
-    for (int i=0; i<(int)infix.length();i++){
-        char c=infix[i];
-        if(isDigitOrDot(c)){
-            postfix+=c;
-        }else if(c==' ') {
+// Simple char stack (array-based)
+class CharStack {
+public:
+    char arr[100];
+    int top;
+    CharStack() { top = -1; }
+    void push(char c) { arr[++top] = c; }
+    char pop() { return arr[top--]; }
+    char peek() { return arr[top]; }
+    bool empty() { return top == -1; }
+};
+
+// Simple double stack (array-based)
+class DoubleStack {
+public:
+    double arr[100];
+    int top;
+    DoubleStack() { top = -1; }
+    void push(double v) { arr[++top] = v; }
+    double pop() { return arr[top--]; }
+    double peek() { return arr[top]; }
+    bool empty() { return top == -1; }
+};
+
+string infixToPostfix(string infix) {
+    CharStack st;
+    string postfix = "";
+    for (int i = 0; i < (int)infix.length(); i++) {
+        char c = infix[i];
+        if (isDigitOrDot(c)) {
+            postfix += c;
+        } else if (c == ' ') {
             continue;
         } else {
             postfix += ' ';
             if (c == '(')
                 st.push(c);
             else if (c == ')') {
-                while (!st.empty() && st.top() != '(') {
-                    postfix += st.top();
+                while (!st.empty() && st.peek() != '(') {
+                    postfix += st.pop();
                     postfix += ' ';
-                    st.pop();
                 }
                 if (!st.empty()) st.pop();
             } else {
-                while (!st.empty() && precedence(st.top()) >= precedence(c)) {
-                    postfix += st.top();
+                while (!st.empty() && precedence(st.peek()) >= precedence(c)) {
+                    postfix += st.pop();
                     postfix += ' ';
-                    st.pop();
                 }
                 st.push(c);
             }
@@ -131,14 +154,13 @@ string infixToPostfix(string infix){
     }
     while (!st.empty()) {
         postfix += ' ';
-        postfix += st.top();
-        st.pop();
+        postfix += st.pop();
     }
     return postfix;
 }
 
 double evaluatePostfix(string postfix) {
-    stack<double> st;
+    DoubleStack st;
     string num = "";
     for (int i = 0; i < (int)postfix.length(); i++) {
         char c = postfix[i];
@@ -148,12 +170,12 @@ double evaluatePostfix(string postfix) {
             st.push(stod(num));
             num = "";
         } else if (c == '+' || c == '-' || c == '*' || c == '/') {
-            double b = st.top(); st.pop();
-            double a = st.top(); st.pop();
+            double b = st.pop();
+            double a = st.pop();
             st.push(applyOp(a, b, c));
         }
     }
-    return st.top();
+    return st.peek();
 }
 
 int main() {
