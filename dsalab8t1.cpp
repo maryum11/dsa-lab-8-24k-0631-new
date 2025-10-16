@@ -1,4 +1,8 @@
-// 24K-0722
+// 24K-0631 Maryum Faisal
+// Task 1
+// Implement and insert the values “BORROWROB” in the stack and identify if it’s a palindrome or not.
+// Using arrays with push() and pop() functions.
+
 #include<iostream>
 using namespace std;
 class Stack{
